@@ -23,6 +23,6 @@ jobs:
               uses: docker/build-push-action@v2.3.0
               with:
                   push: true
-                  tags: ericmathison/nginx:latest, ericmathison/nginx:1, ericmathison/nginx:1.19, ericmathison/nginx:1.19-fastcgi
+                  tags: ericmathison/nginx-nocache:latest, ericmathison/nginx-nocache:1, ericmathison/nginx-nocache:1.19, ericmathison/nginx-nocache:1.19-fastcgi
             - name: Image digest
               run: echo ${{ steps.docker_build.outputs.digest }}
