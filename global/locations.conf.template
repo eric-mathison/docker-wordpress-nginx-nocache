@@ -1,9 +1,10 @@
+rewrite podcast-download/([^/]+)/([^/]*)/? /index.php?podcast_episode=$1 break;
+rewrite podcast-player/([^/]+)/([^/]*)/? /index.php?podcast_episode=$1&podcast_ref=player break;
+
 location / {
   try_files $uri $uri/ /index.php?$args; 
   rewrite ^/sitemap_index.xml$ /index.php?sitemap=1 last;
   rewrite ^/([^/]+?)-sitemap([0-9]+)?.xml$ /index.php?sitemap=$1&sitemap_n=$2 last;
-  rewrite ^/podcast-download/([^/]+)/([^/]*)/? /index.php?podcast_episode=$1 last;
-  rewrite ^/podcast-player/([^/]+)/([^/]*)/? /index.php?podcast_episode=$1&podcast_ref=player last;
 }
 
 location = /favicon.ico {
