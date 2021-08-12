@@ -13,3 +13,4 @@ RUN mkdir /etc/nginx/global
 RUN sed -i 's/user  nginx/user  www-data/' /etc/nginx/nginx.conf
 RUN sed -i 's/worker_processes  1;/worker_processes  auto;/' /etc/nginx/nginx.conf
 RUN sed -i 's/keepalive_timeout  65;/#keepalive_timeout  65;/' /etc/nginx/nginx.conf
+RUN sed -i 's/access_log/#access_log/' /etc/nginx/nginx.conf
