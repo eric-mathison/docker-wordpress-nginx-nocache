@@ -1,3 +1,49 @@
+# Deny all attempts to access hidden files such as .htaccess, .htpasswd, .DS_Store (Mac).
+# Keep logging the requests to parse later (or to pass to firewall utilities such as fail2ban)
+location ^~ /\. {
+  deny all;
+}
+
+# Deny access to any files with a .php extension in the uploads directory
+# Works in sub-directory installs and also in multisite network
+# Keep logging the requests to parse later (or to pass to firewall utilities such as fail2ban)
+location ^~ /(?:uploads|files)/.*\.php$ {
+  deny all;
+}
+
+# These rules was taken from: https://jesus.perezpaz.es/874/wordpress-nginx-configuration/ and
+# pretend to avoid to hacking tools to get information about Wordpress installation
+#
+#    Common deny or internal locations, to help prevent access to areas of
+#    the site that should not be public
+location ~* wp-admin/includes { deny all; }
+location ~* wp-includes/theme-compat/ { deny all; }
+location ~* wp-includes/js/tinymce/langs/.*\.php { deny all; }
+location /wp-content/ { internal; }
+location /wp-includes/ { internal; }
+
+#    Protects the wp-config.php|readme.html|license.txt files from being
+#    accessed (uncomment after wordpress installation)
+location ~* /(\.|wp-config.php|readme.html|license.txt) {
+  deny all; 
+}
+
+#    Prevent access to any files starting with a $ (usually temp files)
+location ~* ~$ { access_log off; log_not_found off; deny all; }
+
+# Prevent access to protected Woocommerce and Download files
+location ^~ /wp-content/uploads/woocommerce_uploads/ {
+    if ( $upstream_http_x_accel_redirect = "" ) {
+        return 403;
+    }
+    internal;
+}
+
+location ^~ /wp-content/uploads/dlm_uploads/ {
+  internal;
+}
+
+# Default rules
 rewrite podcast-download/([^/]+)/([^/]*)/? /index.php?podcast_episode=$1 break;
 rewrite podcast-player/([^/]+)/([^/]*)/? /index.php?podcast_episode=$1&podcast_ref=player break;
 
@@ -58,7 +104,7 @@ location ~* \.(eot|otf|woff|woff2|ttf|zip|tgz|rar|bz2|doc|xls|exe|ppt|tar|mid|mi
 }
 
 # Media: images, icons, video, audio send expires headers.
-location ~* \.(?:jpg|jpeg|gif|png|ico|cur|gz|svg|mp3|mp4|ogg|ogv|webm|webp|htc)$ {
+location ~* \.(?:jpg|jpeg|gif|png|ico|cur|gz|svg|mp3|mp4|ogg|ogv|webm|webp|htc|pdf)$ {
   expires 1y;
   access_log off;
 }
@@ -111,44 +157,5 @@ location ~ [^/]\.php(/|$) {
   fastcgi_pass ${FASTCGI_HOST}:9000;
   fastcgi_pass_header Set-Cookie;
   fastcgi_pass_header Cookie;
-}
-
-# Deny all attempts to access hidden files such as .htaccess, .htpasswd, .DS_Store (Mac).
-# Keep logging the requests to parse later (or to pass to firewall utilities such as fail2ban)
-location ~ /\. {
-  deny all;
-}
-
-# Deny access to any files with a .php extension in the uploads directory
-# Works in sub-directory installs and also in multisite network
-# Keep logging the requests to parse later (or to pass to firewall utilities such as fail2ban)
-location ~* /(?:uploads|files)/.*\.php$ {
-  deny all;
-}
-
-# These rules was taken from: https://jesus.perezpaz.es/874/wordpress-nginx-configuration/ and
-# pretend to avoid to hacking tools to get information about Wordpress installation
-#
-#    Common deny or internal locations, to help prevent access to areas of
-#    the site that should not be public
-location ~* wp-admin/includes { deny all; }
-location ~* wp-includes/theme-compat/ { deny all; }
-location ~* wp-includes/js/tinymce/langs/.*\.php { deny all; }
-location /wp-content/ { internal; }
-location /wp-includes/ { internal; }
-
-#    Protects the wp-config.php|readme.html|license.txt files from being
-#    accessed (uncomment after wordpress installation)
-location ~ /(\.|wp-config.php|readme.html|license.txt) { deny all; }
-
-#    Prevent access to any files starting with a $ (usually temp files)
-location ~ ~$ { access_log off; log_not_found off; deny all; }
-
-# Prevent access to protected Woocommerce and Download files
-location ~* /wp-content/uploads/woocommerce_uploads/ {
-  internal;
-}
-
-location ~* /wp-content/uploads/dlm_uploads/ {
-  internal;
+  fastcgi_read_timeout 600;
 }
